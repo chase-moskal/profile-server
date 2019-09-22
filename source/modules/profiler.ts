@@ -54,10 +54,23 @@ export class Profiler implements ProfilerTopic {
 		})
 		const {userId} = user
 
+		const errorWhenStringTooBig = (limit: number, value: string) => {
+			if (value.length > limit) throw new Error("string in profile too big!")
+		}
+
+		errorWhenStringTooBig(1000, givenProfile.private.realname)
+		errorWhenStringTooBig(1000, givenProfile.public.nickname)
+		errorWhenStringTooBig(1000, givenProfile.public.picture)
+
 		const profile: Profile = {
 			userId,
-			public: givenProfile.public,
-			private: givenProfile.private
+			public: {
+				picture: givenProfile.public.picture,
+				nickname: givenProfile.public.nickname,
+			},
+			private: {
+				realname: givenProfile.private.realname,
+			}
 		}
 
 		await this._collection.updateOne({userId}, profile, {upsert: true})

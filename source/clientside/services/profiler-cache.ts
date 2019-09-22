@@ -1,48 +1,76 @@
 
-// import {
-// 	AuthTokens,
-// 	AccessToken,
-// 	TokenStorageTopic,
-// 	AuthExchangerTopic,
-// } from "authoritarian/dist/interfaces"
+import {
+	Profile,
+	AccessToken,
+	ProfilerTopic,
+} from "authoritarian/dist/interfaces"
 
-// export class TokenStorage implements TokenStorageTopic {
-// 	private _storage: Storage
-// 	private _authExchanger: AuthExchangerTopic
+const prefix = "profiler"
 
-// 	constructor(options: {
-// 		storage: Storage
-// 		authExchanger: AuthExchangerTopic
-// 	}) {
-// 		this._storage = options.storage
-// 		this._authExchanger = options.authExchanger
-// 	}
+export class ProfilerCache implements ProfilerTopic {
+	private _storage: Storage
+	private _profiler: ProfilerTopic
+	private _cacheExpiryMilliseconds: number
 
-// 	async writeTokens({accessToken, refreshToken}: AuthTokens): Promise<void> {
-// 		this._storage.setItem("accessToken", accessToken)
-// 		this._storage.setItem("refreshToken", refreshToken)
-// 	}
+	constructor(options: {
+		storage: Storage
+		profiler: ProfilerTopic
+		cacheExpiryMinutes: number
+	}) {
+		this._storage = options.storage
+		this._profiler = options.profiler
+		this._cacheExpiryMilliseconds = options.cacheExpiryMinutes * (60 * 1000)
+	}
 
-// 	async clearTokens(): Promise<void> {
-// 		this._storage.removeItem("accessToken")
-// 		this._storage.removeItem("refreshToken")
-// 	}
+	private _isExpired(cacheKey: string) {
+		const last: number = JSON.parse(this._storage.getItem(`${cacheKey}-last`))
+		if (!last) return true
+		const since = Date.now() - last
+		const expired = since > this._cacheExpiryMilliseconds
+		return expired
+	}
 
-// 	async passiveCheck(): Promise<AccessToken> {
-// 		let accessToken = this._storage.getItem("accessToken")
-// 		let refreshToken = this._storage.getItem("refreshToken")
+	private _writeToCache(cacheKey: string, profile: Profile) {
+		this._storage.setItem(cacheKey, JSON.stringify(profile))
+		this._storage.setItem(`${cacheKey}-last`, JSON.stringify(Date.now()))
+	}
 
-// 		if (!accessToken) {
-// 			if (refreshToken) {
-// 				accessToken = await this._authExchanger.authorize({refreshToken})
-// 			}
-// 			else {
-// 				accessToken = null
-// 			}
-// 		}
+	async getFullProfile(options: {accessToken: AccessToken}) {
+		const cacheKey = `${prefix}-full-profile`
+		let profile: Profile
 
-// 		await this.writeTokens({accessToken, refreshToken})
+		if (this._isExpired(cacheKey)) {
+			profile = await this._profiler.getFullProfile(options)
+			this._writeToCache(cacheKey, profile)
+		}
+		else {
+			profile = JSON.parse(this._storage.getItem(cacheKey))
+		}
+		
+		return profile
+	}
 
-// 		return accessToken
-// 	}
-// }
+	async getPublicProfile(options: {userId: string}) {
+		const cacheKey = `${prefix}-public-profile`
+		let profile: Profile
+
+		if (this._isExpired(cacheKey)) {
+			profile = await this._profiler.getPublicProfile(options)
+			this._writeToCache(cacheKey, profile)
+		}
+		else {
+			profile = JSON.parse(this._storage.getItem(cacheKey))
+		}
+
+		return profile
+	}
+
+	async setFullProfile(options: {accessToken: AccessToken; profile: Profile}) {
+		await this._profiler.setFullProfile(options)
+		this._writeToCache(`${prefix}-full-profile`, options.profile)
+		this._writeToCache(`${prefix}-public-profile`, {
+			userId: options.profile.userId,
+			public: options.profile.public
+		})
+	}
+}

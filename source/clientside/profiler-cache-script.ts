@@ -1,46 +1,44 @@
 
-console.log("cache coming soon ;)")
+import {Host as CrosscallHost} from "crosscall/dist/cjs/host"
+import {ProfilerApi} from "authoritarian/dist/cjs/interfaces"
+import {profilerApiShape} from "authoritarian/dist/cjs/shapes"
 
-// import {Host as CrosscallHost} from "crosscall/dist/cjs/host"
-// import {AuthExchangerApi} from "authoritarian/dist/cjs/interfaces"
-// import {authExchangerApiShape} from "authoritarian/dist/cjs/shapes"
+import {
+	createApiClient as createRenrakuApiClient
+} from "renraku/dist/cjs/client/create-api-client"
 
-// import {
-// 	createApiClient as createRenrakuApiClient
-// } from "renraku/dist/cjs/client/create-api-client"
+import {ProfilerCache} from "./services/profiler-cache"
 
-// import {TokenStorage} from "./services/token-storage"
+main()
+	.then(() => console.log("🎟️ token script"))
+	.catch(error => console.error(error))
 
-// main()
-// 	.then(() => console.log("🎟️ token script"))
-// 	.catch(error => console.error(error))
+async function main() {
+	const {profiler} = await createRenrakuApiClient<ProfilerApi>({
+		url: `${window.location.origin}/api`,
+		shape: profilerApiShape
+	})
 
-// async function main() {
+	new CrosscallHost({
+		namespace: "authoritarian-token-storage",
 
-// 	const {authExchanger} = await createRenrakuApiClient<AuthExchangerApi>({
-// 		url: `${window.location.origin}/api`,
-// 		shape: authExchangerApiShape
-// 	})
+		callee: {
+			topics: {
+				profiler: <any>new ProfilerCache({
+					storage: window.localStorage,
+					cacheExpiryMinutes: 10,
+					profiler
+				})
+			},
+			events: {}
+		},
 
-// 	new CrosscallHost({
-// 		namespace: "authoritarian-token-storage",
-
-// 		callee: {
-// 			topics: {
-// 				tokenStorage: <any>new TokenStorage({
-// 					authExchanger,
-// 					storage: window.localStorage
-// 				})
-// 			},
-// 			events: {}
-// 		},
-
-// 		permissions: [{
-// 			origin: /^https?:\/\/localhost:8\d{3}$/i,
-// 			allowedTopics: {
-// 				tokenStorage: ["passiveCheck", "clearTokens", "writeTokens"]
-// 			},
-// 			allowedEvents: []
-// 		}]
-// 	})
-// }
+		permissions: [{
+			origin: /^https?:\/\/localhost:8\d{3}$/i,
+			allowedTopics: {
+				tokenStorage: ["getPublicProfile", "getFullProfile", "setFullProfile"]
+			},
+			allowedEvents: []
+		}]
+	})
+}
