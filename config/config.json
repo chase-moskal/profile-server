@@ -1,0 +1,13 @@
+{
+	"profiler": {
+		"port": 8001
+	},
+	"profilerCache": {
+		"allowedOriginsRegex": ["^http:\/\/localhost:8080$", "i"]
+	},
+	"database": {
+		"uri": "mongodb+srv://admin:admin@devcluster-g4uwh.mongodb.net/test?retryWrites=true&w=majority",
+		"dbName": "profiler",
+		"collectionName": "profiles"
+	}
+}
