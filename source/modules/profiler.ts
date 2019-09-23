@@ -80,6 +80,6 @@ export class Profiler implements ProfilerTopic {
 			}
 		}
 
-		await this._collection.updateOne({userId}, profile, {upsert: true})
+		await this._collection.replaceOne({userId}, profile, {upsert: true})
 	}
 }
