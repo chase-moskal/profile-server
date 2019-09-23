@@ -2,9 +2,9 @@
 import * as pug from "pug"
 import * as Koa from "koa"
 import {readFile} from "fancyfs"
+import * as cors from "@koa/cors"
 import * as mount from "koa-mount"
 import * as serve from "koa-static"
-import {OAuth2Client} from "google-auth-library"
 import {ProfilerApi} from "authoritarian/dist/cjs/interfaces"
 import {createApiServer} from "renraku/dist/cjs/server/create-api-server"
 
@@ -35,6 +35,7 @@ export async function main() {
 	}
 
 	const htmlKoa = new Koa()
+	htmlKoa.use(cors())
 
 	// profiler cache
 	htmlKoa.use(httpHandler("get", "/profiler-cache", async() => {
@@ -75,6 +76,5 @@ export async function main() {
 	koa.use(mount("/html", htmlKoa))
 	koa.use(mount("/api", profilerKoa))
 	koa.listen(config.profiler.port)
-	console.log(`Auth server listening on port ${config.profiler.port}`)
+	console.log(`Profiler server listening on port ${config.profiler.port}`)
 }
-

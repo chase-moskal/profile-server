@@ -1,26 +1,19 @@
 
-import {Host as CrosscallHost} from "crosscall/dist/cjs/host"
-import {ProfilerApi} from "authoritarian/dist/cjs/interfaces"
-import {profilerApiShape} from "authoritarian/dist/cjs/shapes"
-
-import {
-	createApiClient as createRenrakuApiClient
-} from "renraku/dist/cjs/client/create-api-client"
-
 import {ProfilerCache} from "./services/profiler-cache"
+import {Host as CrosscallHost} from "crosscall/dist/cjs/host"
+import {createProfilerClient} from "./services/profiler-client"
 
 main()
-	.then(() => console.log("🎟️ token script"))
+	.then(() => console.log("profiler"))
 	.catch(error => console.error(error))
 
 async function main() {
-	const {profiler} = await createRenrakuApiClient<ProfilerApi>({
-		url: `${window.location.origin}/api`,
-		shape: profilerApiShape
+	const profiler = await createProfilerClient({
+		url: `${window.location.origin}/api`
 	})
 
 	new CrosscallHost({
-		namespace: "authoritarian-token-storage",
+		namespace: "authoritarian-profiler-cache",
 
 		callee: {
 			topics: {
@@ -36,7 +29,7 @@ async function main() {
 		permissions: [{
 			origin: /^https?:\/\/localhost:8\d{3}$/i,
 			allowedTopics: {
-				tokenStorage: ["getPublicProfile", "getFullProfile", "setFullProfile"]
+				profiler: ["getPublicProfile", "getFullProfile", "setFullProfile"]
 			},
 			allowedEvents: []
 		}]

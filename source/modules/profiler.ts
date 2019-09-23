@@ -14,53 +14,60 @@ export class Profiler implements ProfilerTopic {
 	private _authServerPublicKey: string
 
 	constructor({collection, authServerPublicKey}: {
-	collection: Collection
-	authServerPublicKey: string
-}) {
+		collection: Collection
+		authServerPublicKey: string
+	}) {
 		this._collection = collection
 		this._authServerPublicKey = authServerPublicKey
 	}
 
 	async getPublicProfile({userId}: {userId: string}): Promise<Profile> {
 		const profile = await this._collection.findOne<Profile>({userId})
-		return {
-			userId,
-			public: profile.public
-		}
+		return profile
+			? {
+				userId,
+				public: profile.public
+			}
+			: null
 	}
 
 	async getFullProfile({accessToken}: {accessToken: AccessToken}) {
-		const {user} = await verifyToken<AccessPayload>({
+		const {payload} = await verifyToken<AccessPayload>({
 			token: accessToken,
 			publicKey: this._authServerPublicKey
 		})
-		const {userId} = user
 
+		const {userId} = payload.user
 		const profile = await this._collection.findOne<Profile>({userId})
-		return {
-			userId,
-			public: profile.public,
-			private: profile.private
-		}
+
+		return profile
+			? {
+				userId,
+				public: profile.public,
+				private: profile.private
+			}
+			: null
 	}
 
 	async setFullProfile({accessToken, profile: givenProfile}: {
 		accessToken: AccessToken
 		profile: Profile
 	}) {
-		const {user} = await verifyToken<AccessPayload>({
+		console.log("SET FULL PROFILE")
+
+		const {payload} = await verifyToken<AccessPayload>({
 			token: accessToken,
 			publicKey: this._authServerPublicKey
 		})
-		const {userId} = user
+		const {userId} = payload.user
 
 		const errorWhenStringTooBig = (limit: number, value: string) => {
 			if (value.length > limit) throw new Error("string in profile too big!")
 		}
 
-		errorWhenStringTooBig(1000, givenProfile.private.realname)
-		errorWhenStringTooBig(1000, givenProfile.public.nickname)
 		errorWhenStringTooBig(1000, givenProfile.public.picture)
+		errorWhenStringTooBig(1000, givenProfile.public.nickname)
+		errorWhenStringTooBig(1000, givenProfile.private.realname)
 
 		const profile: Profile = {
 			userId,

@@ -1,10 +1,10 @@
 
-import {ProfilerApi} from "authoritarian/dist/interfaces"
+import {ProfilerApi} from "authoritarian/dist/cjs/interfaces"
 import {profilerApiShape} from "authoritarian/dist/cjs/shapes"
-import {createApiClient} from "renraku/dist/cjs/client/create-api-client"
+import {createNodeApiClient} from "renraku/dist/cjs/client/create-node-api-client"
 
 export async function createProfilerClient({url}: {url: string}) {
-	const {profiler} = await createApiClient<ProfilerApi>({
+	const {profiler} = await createNodeApiClient<ProfilerApi>({
 		url,
 		shape: profilerApiShape
 	})

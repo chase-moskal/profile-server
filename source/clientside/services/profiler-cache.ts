@@ -3,7 +3,7 @@ import {
 	Profile,
 	AccessToken,
 	ProfilerTopic,
-} from "authoritarian/dist/interfaces"
+} from "authoritarian/dist/cjs/interfaces"
 
 const prefix = "profiler"
 
@@ -22,44 +22,46 @@ export class ProfilerCache implements ProfilerTopic {
 		this._cacheExpiryMilliseconds = options.cacheExpiryMinutes * (60 * 1000)
 	}
 
-	private _isExpired(cacheKey: string) {
-		const last: number = JSON.parse(this._storage.getItem(`${cacheKey}-last`))
-		if (!last) return true
+	private _readFromCache(cacheKey: string): {profile: Profile; last: number} {
+		const rawProfile = this._storage.getItem(cacheKey)
+		const rawLast = this._storage.getItem(`${cacheKey}-last`)
+
+		const profile = rawProfile ? JSON.parse(rawProfile) : null
+		const last = rawLast ? JSON.parse(rawLast) : null
+
+		return {profile, last}
+	}
+
+	private _isExpired(last: number) {
 		const since = Date.now() - last
 		const expired = since > this._cacheExpiryMilliseconds
 		return expired
 	}
 
 	private _writeToCache(cacheKey: string, profile: Profile) {
-		this._storage.setItem(cacheKey, JSON.stringify(profile))
+		this._storage.setItem(cacheKey, JSON.stringify(profile || ""))
 		this._storage.setItem(`${cacheKey}-last`, JSON.stringify(Date.now()))
 	}
 
 	async getFullProfile(options: {accessToken: AccessToken}) {
 		const cacheKey = `${prefix}-full-profile`
-		let profile: Profile
+		let {profile, last} = this._readFromCache(cacheKey)
 
-		if (this._isExpired(cacheKey)) {
+		if (!profile || this._isExpired(last)) {
 			profile = await this._profiler.getFullProfile(options)
 			this._writeToCache(cacheKey, profile)
 		}
-		else {
-			profile = JSON.parse(this._storage.getItem(cacheKey))
-		}
-		
+
 		return profile
 	}
 
 	async getPublicProfile(options: {userId: string}) {
 		const cacheKey = `${prefix}-public-profile`
-		let profile: Profile
+		let {profile, last} = this._readFromCache(cacheKey)
 
-		if (this._isExpired(cacheKey)) {
+		if (!profile || this._isExpired(last)) {
 			profile = await this._profiler.getPublicProfile(options)
 			this._writeToCache(cacheKey, profile)
-		}
-		else {
-			profile = JSON.parse(this._storage.getItem(cacheKey))
 		}
 
 		return profile
