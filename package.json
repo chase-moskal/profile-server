@@ -27,7 +27,7 @@
 	"homepage": "https://github.com/chase-moskal/profiler#readme",
 	"dependencies": {
 		"@koa/cors": "^3.0.0",
-		"authoritarian": "0.0.0-dev.24",
+		"authoritarian": "0.0.0-dev.26",
 		"crosscall": "0.0.6-dev.9",
 		"fancyfs": "^0.1.0",
 		"google-auth-library": "^5.2.2",
