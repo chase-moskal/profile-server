@@ -3,13 +3,13 @@ import {Collection} from "mongodb"
 import {
 	Profile,
 	AccessToken,
-	ProfilerTopic,
 	AccessPayload,
-} from "authoritarian/dist/cjs/interfaces"
+	ProfileMagistrateTopic,
+} from "authoritarian/dist-cjs/interfaces"
 
-import {verifyToken} from "authoritarian/dist/cjs/crypto"
+import {verifyToken} from "authoritarian/dist-cjs/crypto"
 
-export class Profiler implements ProfilerTopic {
+export class ProfileMagistrate implements ProfileMagistrateTopic {
 	private _collection: Collection
 	private _authServerPublicKey: string
 

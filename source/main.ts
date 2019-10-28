@@ -5,14 +5,13 @@ import {readFile} from "fancyfs"
 import * as cors from "@koa/cors"
 import * as mount from "koa-mount"
 import * as serve from "koa-static"
-import {ProfilerApi} from "authoritarian/dist/cjs/interfaces"
-import {createApiServer} from "renraku/dist/cjs/server/create-api-server"
+import {createApiServer} from "renraku/dist-cjs/server/create-api-server"
 
-import {Profiler} from "./modules/profiler"
 import {httpHandler} from "./modules/http-handler"
+import {ProfileMagistrate} from "./modules/profile-magistrate"
 import {createMongoCollection} from "./modules/create-mongo-collection"
 
-import {Config} from "./interfaces"
+import {Config, Api} from "./interfaces"
 
 const getTemplate = async(filename: string) =>
 	pug.compile(<string>await readFile(`source/clientside/templates/${filename}`, "utf8"))
@@ -31,41 +30,41 @@ export async function main() {
 	//
 
 	const templates = {
-		profilerCache: await getTemplate("profiler-cache.pug")
+		profileMagistrateCache: await getTemplate("profile-magistrate-cache.pug")
 	}
 
 	const htmlKoa = new Koa()
 	htmlKoa.use(cors())
 
-	// profiler cache
-	htmlKoa.use(httpHandler("get", "/profiler-cache", async() => {
-		console.log("/profiler-cache")
-		return templates.profilerCache()
+	// magistrate cache
+	htmlKoa.use(httpHandler("get", "/profile-magistrate-cache", async() => {
+		console.log("/profile-magistrate-cache")
+		return templates.profileMagistrateCache()
 	}))
 
 	// static clientside content
 	htmlKoa.use(serve("dist/clientside"))
 
 	//
-	// AUTH EXCHANGER
+	// PROFILE SERVER API
 	// renraku json rpc api
 	//
 
-	const {koa: profilerKoa} = createApiServer<ProfilerApi>({
+	const {koa: apiKoa} = createApiServer<Api>({
 		debug: true,
 		logger: console,
-		exposures: [
-			{
-				allowed: /^http\:\/\/localhost\:8\d{3}$/i,
-				forbidden: null,
-				exposed: {
-					profiler: new Profiler({
-						authServerPublicKey,
-						collection: profilesCollection
-					})
-				}
+		topics: {
+			profileMagistrate: {
+				cors: {
+					allowed: /^https?\:\/\/localhost\:8\d{3}$/i,
+					forbidden: null
+				},
+				exposed: new ProfileMagistrate({
+					authServerPublicKey,
+					collection: profilesCollection
+				})
 			}
-		]
+		},
 	})
 
 	//
@@ -74,7 +73,7 @@ export async function main() {
 
 	const koa = new Koa()
 	koa.use(mount("/html", htmlKoa))
-	koa.use(mount("/api", profilerKoa))
-	koa.listen(config.profiler.port)
-	console.log(`Profiler server listening on port ${config.profiler.port}`)
+	koa.use(mount("/api", apiKoa))
+	koa.listen(config.server.port)
+	console.log(`Profile server listening on port ${config.server.port}`)
 }

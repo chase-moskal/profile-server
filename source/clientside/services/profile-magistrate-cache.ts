@@ -2,23 +2,23 @@
 import {
 	Profile,
 	AccessToken,
-	ProfilerTopic,
-} from "authoritarian/dist/cjs/interfaces"
+	ProfileMagistrateTopic,
+} from "authoritarian/dist-cjs/interfaces"
 
-const prefix = "profiler"
+const prefix = "profile-magistrate-cache"
 
-export class ProfilerCache implements ProfilerTopic {
+export class ProfileMagistrateCache implements ProfileMagistrateTopic {
 	private _storage: Storage
-	private _profiler: ProfilerTopic
+	private _magistrate: ProfileMagistrateTopic
 	private _cacheExpiryMilliseconds: number
 
 	constructor(options: {
 		storage: Storage
-		profiler: ProfilerTopic
+		profileMagistrate: ProfileMagistrateTopic
 		cacheExpiryMinutes: number
 	}) {
 		this._storage = options.storage
-		this._profiler = options.profiler
+		this._magistrate = options.profileMagistrate
 		this._cacheExpiryMilliseconds = options.cacheExpiryMinutes * (60 * 1000)
 	}
 
@@ -48,7 +48,7 @@ export class ProfilerCache implements ProfilerTopic {
 		let {profile, last} = this._readFromCache(cacheKey)
 
 		if (!profile || this._isExpired(last)) {
-			profile = await this._profiler.getFullProfile(options)
+			profile = await this._magistrate.getFullProfile(options)
 			this._writeToCache(cacheKey, profile)
 		}
 
@@ -60,7 +60,7 @@ export class ProfilerCache implements ProfilerTopic {
 		let {profile, last} = this._readFromCache(cacheKey)
 
 		if (!profile || this._isExpired(last)) {
-			profile = await this._profiler.getPublicProfile(options)
+			profile = await this._magistrate.getPublicProfile(options)
 			this._writeToCache(cacheKey, profile)
 		}
 
@@ -68,7 +68,7 @@ export class ProfilerCache implements ProfilerTopic {
 	}
 
 	async setFullProfile(options: {accessToken: AccessToken; profile: Profile}) {
-		await this._profiler.setFullProfile(options)
+		await this._magistrate.setFullProfile(options)
 		this._writeToCache(`${prefix}-full-profile`, options.profile)
 		this._writeToCache(`${prefix}-public-profile`, {
 			userId: options.profile.userId,

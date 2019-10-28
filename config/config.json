@@ -1,8 +1,8 @@
 {
-	"profiler": {
+	"server": {
 		"port": 8001
 	},
-	"profilerCache": {
+	"magistrateCache": {
 		"allowedOriginsRegex": ["^http:\/\/localhost:8080$", "i"]
 	},
 	"database": {
