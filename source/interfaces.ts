@@ -1,10 +1,7 @@
 
-import {TopicApi} from "renraku/dist-cjs/interfaces"
-import {ProfileMagistrateTopic} from "authoritarian/dist-cjs/interfaces"
+import {ProfileApi} from "authoritarian/dist-cjs/interfaces"
 
-export interface Api extends TopicApi<Api> {
-	profileMagistrate: ProfileMagistrateTopic
-}
+export {ProfileApi}
 
 export interface Config {
 	server: {

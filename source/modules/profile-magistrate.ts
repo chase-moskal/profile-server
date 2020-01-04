@@ -21,35 +21,11 @@ export class ProfileMagistrate implements ProfileMagistrateTopic {
 		this._authServerPublicKey = authServerPublicKey
 	}
 
-	async getPublicProfile({userId}: {userId: string}): Promise<Profile> {
-		const profile = await this._collection.findOne<Profile>({userId})
-		return profile
-			? {
-				userId,
-				public: profile.public
-			}
-			: null
+	async getProfile({userId}: {userId: string}): Promise<Profile> {
+		return this._collection.findOne<Profile>({userId})
 	}
 
-	async getFullProfile({accessToken}: {accessToken: AccessToken}) {
-		const {payload} = await verifyToken<AccessPayload>({
-			token: accessToken,
-			publicKey: this._authServerPublicKey
-		})
-
-		const {userId} = payload.user
-		const profile = await this._collection.findOne<Profile>({userId})
-
-		return profile
-			? {
-				userId,
-				public: profile.public,
-				private: profile.private
-			}
-			: null
-	}
-
-	async setFullProfile({accessToken, profile: givenProfile}: {
+	async setProfile({accessToken, profile: givenProfile}: {
 		accessToken: AccessToken
 		profile: Profile
 	}) {
@@ -65,19 +41,13 @@ export class ProfileMagistrate implements ProfileMagistrateTopic {
 			if (value.length > limit) throw new Error("string in profile too big!")
 		}
 
-		errorWhenStringTooBig(1000, givenProfile.public.picture)
-		errorWhenStringTooBig(1000, givenProfile.public.nickname)
-		errorWhenStringTooBig(1000, givenProfile.private.realname)
+		errorWhenStringTooBig(1000, givenProfile.avatar)
+		errorWhenStringTooBig(1000, givenProfile.nickname)
 
 		const profile: Profile = {
 			userId,
-			public: {
-				picture: givenProfile.public.picture,
-				nickname: givenProfile.public.nickname,
-			},
-			private: {
-				realname: givenProfile.private.realname,
-			}
+			avatar: givenProfile.avatar,
+			nickname: givenProfile.nickname,
 		}
 
 		await this._collection.replaceOne({userId}, profile, {upsert: true})
