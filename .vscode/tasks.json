@@ -5,7 +5,7 @@
 			"label": "install",
 			"type": "shell",
 			"command": "npm",
-			"args": ["install"],
+			"args": ["run", "prepare", "-s"],
 			"problemMatcher": ["$tsc"],
 			"group": {
 				"kind": "build",
