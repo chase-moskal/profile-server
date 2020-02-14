@@ -2,7 +2,7 @@
 import * as Koa from "koa"
 import {readFile} from "fancyfs"
 import * as mount from "koa-mount"
-import {createApiServer} from "renraku/dist-cjs/server/create-api-server"
+import {apiServer} from "renraku/dist-cjs/api-server"
 
 import {ProfileMagistrate} from "./modules/profile-magistrate"
 import {createMongoCollection} from "./modules/create-mongo-collection"
@@ -21,7 +21,7 @@ export async function main() {
 	// renraku json rpc api
 	//
 
-	const {koa: apiKoa} = createApiServer<ProfileApi>({
+	const {koa: apiKoa} = apiServer<ProfileApi>({
 		debug: true,
 		logger: console,
 		exposures: {

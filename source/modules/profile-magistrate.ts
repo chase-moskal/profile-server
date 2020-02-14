@@ -7,7 +7,7 @@ import {
 	ProfileMagistrateTopic,
 } from "authoritarian/dist-cjs/interfaces"
 
-import {verifyToken} from "authoritarian/dist-cjs/crypto"
+import {tokenVerify} from "redcrypto/dist/token-verify.js"
 
 export class ProfileMagistrate implements ProfileMagistrateTopic {
 	private _collection: Collection
@@ -31,7 +31,7 @@ export class ProfileMagistrate implements ProfileMagistrateTopic {
 	}) {
 		console.log("SET FULL PROFILE")
 
-		const {payload} = await verifyToken<AccessPayload>({
+		const {payload} = await tokenVerify<AccessPayload>({
 			token: accessToken,
 			publicKey: this._authServerPublicKey
 		})
