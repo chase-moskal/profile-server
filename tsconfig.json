@@ -5,8 +5,9 @@
 		"outDir": "dist",
 		"target": "esnext",
 		"lib": ["es6", "dom"],
-		"module": "commonjs",
+		"module": "esnext",
 		"moduleResolution": "node",
+		"allowSyntheticDefaultImports": true,
 		"experimentalDecorators": true,
 		"sourceMap": true
 	},

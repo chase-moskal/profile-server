@@ -1,19 +1,30 @@
 
-import * as Koa from "koa"
-import {readFile} from "fancyfs"
-import * as mount from "koa-mount"
-import {apiServer} from "renraku/dist-cjs/api-server"
+// TODO cjs
+import mod from "module"
+const require = mod.createRequire(import.meta.url)
+import * as _Koa from "koa"
+import * as _fancyfs from "fancyfs"
+import * as _mount from "koa-mount"
+const Koa = require("koa") as typeof _Koa
+const fancyfs = require("fancyfs") as typeof _fancyfs
+const mount = require("koa-mount") as typeof _mount
 
-import {ProfileMagistrate} from "./modules/profile-magistrate"
-import {createMongoCollection} from "./modules/create-mongo-collection"
+import {apiServer} from "renraku/dist/api-server.js"
 
-import {Config, ProfileApi} from "./interfaces"
+import {Config, ProfileApi} from "./interfaces.js"
+import {ProfileMagistrate} from "./modules/profile-magistrate.js"
+import {createMongoCollection} from "./modules/create-mongo-collection.js"
 
 main().catch(error => console.error(error))
 
 export async function main() {
-	const config: Config = JSON.parse(<string>await readFile("config/config.json", "utf8"))
-	const authServerPublicKey = <string>await readFile("config/auth-server.public.pem", "utf8")
+
+	const config: Config =
+		JSON.parse(<string>await fancyfs.readFile("config/config.json", "utf8"))
+
+	const authServerPublicKey =
+		<string>await fancyfs.readFile("config/auth-server.public.pem", "utf8")
+
 	const profilesCollection = await createMongoCollection(config.database)
 
 	//
@@ -21,7 +32,7 @@ export async function main() {
 	// renraku json rpc api
 	//
 
-	const {koa: apiKoa} = apiServer<ProfileApi>({
+	const {koa: apiKoa} = await apiServer<ProfileApi>({
 		debug: true,
 		logger: console,
 		exposures: {

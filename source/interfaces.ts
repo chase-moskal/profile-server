@@ -1,5 +1,5 @@
 
-import {ProfileApi} from "authoritarian/dist-cjs/interfaces"
+import {ProfileApi} from "authoritarian/dist/interfaces.js"
 
 export {ProfileApi}
 
