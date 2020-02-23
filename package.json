@@ -5,12 +5,12 @@
 	"description": "server to manage user profile data",
 	"main": "dist/main.js",
 	"scripts": {
-		"prepare": "run-s clean && run-p build && run-s test",
+		"prepare": "run-s clean && run-p build generate-keys && run-s test",
 		"clean": "rm -rf dist && mkdir dist",
 		"build": "tsc && run-p build-cache-script",
 		"build-cache-script": "browserify dist/clientside/cache-script.js > dist/clientside/cache-script.bundle.js",
 		"watch": "tsc -w",
-		"generate-keys": "./node_modules/authoritarian/generate-keys && mv private.pem config/profile-server.private.pem && mv public.pem config/profile-server.public.pem",
+		"generate-keys": "./node_modules/redcrypto/generate-keys && mv private.pem config/profile-server.private.pem && mv public.pem config/profile-server.public.pem",
 		"start": "node dist/main",
 		"test": "exit 0"
 	},
