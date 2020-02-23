@@ -1,20 +1,21 @@
 
-import * as pug from "pug"
-import * as Koa from "koa"
-import {readFile} from "fancyfs"
-import * as cors from "@koa/cors"
-import * as mount from "koa-mount"
-import * as serve from "koa-static"
-import {createApiServer} from "renraku/dist-cjs/server/create-api-server"
+// TODO cjs
+import mod from "module"
+const require = mod.createRequire(import.meta.url)
+import * as _Koa from "koa"
+import * as _mount from "koa-mount"
+const Koa: typeof _Koa = require("koa") as typeof _Koa
+const mount: typeof _mount = require("koa-mount") as typeof _mount
 
-import {httpHandler} from "./modules/http-handler"
-import {ProfileMagistrate} from "./modules/profile-magistrate"
-import {createMongoCollection} from "./modules/create-mongo-collection"
+import {promises} from "fs"
+const {readFile} = promises
 
-import {Config, Api} from "./interfaces"
+import {apiServer} from "renraku/dist/api-server.js"
 
-const getTemplate = async(filename: string) =>
-	pug.compile(<string>await readFile(`source/clientside/templates/${filename}`, "utf8"))
+import {ProfileMagistrate} from "./modules/profile-magistrate.js"
+import {createMongoCollection} from "./modules/create-mongo-collection.js"
+
+import {Config, ProfileServerApi} from "./interfaces.js"
 
 main().catch(error => console.error(error))
 
@@ -24,47 +25,25 @@ export async function main() {
 	const profilesCollection = await createMongoCollection(config.database)
 
 	//
-	// HTML KOA
-	// compiles pug templates
-	// also serves the clientside dir
-	//
-
-	const templates = {
-		profileMagistrateCache: await getTemplate("profile-magistrate-cache.pug")
-	}
-
-	const htmlKoa = new Koa()
-	htmlKoa.use(cors())
-
-	// magistrate cache
-	htmlKoa.use(httpHandler("get", "/profile-magistrate-cache", async() => {
-		console.log("/profile-magistrate-cache")
-		return templates.profileMagistrateCache()
-	}))
-
-	// static clientside content
-	htmlKoa.use(serve("dist/clientside"))
-
-	//
 	// PROFILE SERVER API
 	// renraku json rpc api
 	//
 
-	const {koa: apiKoa} = createApiServer<Api>({
+	const {koa: apiKoa} = await apiServer<ProfileServerApi>({
 		debug: true,
 		logger: console,
-		topics: {
+		exposures: {
 			profileMagistrate: {
-				cors: {
-					allowed: /^https?\:\/\/localhost\:8\d{3}$/i,
-					forbidden: null
-				},
 				exposed: new ProfileMagistrate({
 					authServerPublicKey,
 					collection: profilesCollection
-				})
+				}),
+				cors: {
+					allowed: /^https?\:\/\/localhost\:8\d{3}$/i,
+					forbidden: null
+				}
 			}
-		},
+		}
 	})
 
 	//
@@ -72,7 +51,6 @@ export async function main() {
 	//
 
 	const koa = new Koa()
-	koa.use(mount("/html", htmlKoa))
 	koa.use(mount("/api", apiKoa))
 	koa.listen(config.server.port)
 	console.log(`Profile server listening on port ${config.server.port}`)

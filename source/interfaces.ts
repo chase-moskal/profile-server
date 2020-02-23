@@ -1,17 +1,14 @@
 
-import {TopicApi} from "renraku/dist-cjs/interfaces"
-import {ProfileMagistrateTopic} from "authoritarian/dist-cjs/interfaces"
+import {Api} from "renraku/dist/interfaces.js"
+import {ProfileMagistrateTopic} from "authoritarian/dist/interfaces.js"
 
-export interface Api extends TopicApi<Api> {
+export interface ProfileServerApi extends Api<ProfileServerApi> {
 	profileMagistrate: ProfileMagistrateTopic
 }
 
 export interface Config {
 	server: {
 		port: number
-	}
-	magistrateCache: {
-		allowedOriginsRegex: [string, string]
 	}
 	database: {
 		uri: string
