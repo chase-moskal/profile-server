@@ -12,7 +12,7 @@ jobs:
     - name: docker build and push
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
-        name: chasemoskal/auth-server
+        name: chasemoskal/profile-server
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         tag_names: true
