@@ -17,16 +17,13 @@ import {createMongoCollection} from "./modules/create-mongo-collection.js"
 
 import {Config, ProfileServerApi} from "./interfaces.js"
 
-const paths = {
-	config: "mount/config",
-	secrets: "mount/secrets",
-}
+const configPath = "config"
 
 main().catch(error => console.error(error))
 
 export async function main() {
-	const config: Config = JSON.parse(<string>await readFile(`${paths.config}/config.json`, "utf8"))
-	const authServerPublicKey = <string>await readFile(`${paths.config}/auth-server.public.pem`, "utf8")
+	const config: Config = JSON.parse(<string>await readFile(`${configPath}/config.json`, "utf8"))
+	const authServerPublicKey = <string>await readFile(`${configPath}/auth-server.public.pem`, "utf8")
 	const profilesCollection = await createMongoCollection(config.database)
 
 	//
