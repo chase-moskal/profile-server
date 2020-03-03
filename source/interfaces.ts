@@ -6,9 +6,21 @@ export interface ProfileServerApi extends Api<ProfileServerApi> {
 	profileMagistrate: ProfileMagistrateTopic
 }
 
+
+export interface JsonRegex {
+	pattern: string
+	flags: string
+}
+
+export interface CorsConfig {
+	allowed: JsonRegex
+	forbidden?: JsonRegex
+}
+
 export interface Config {
 	server: {
 		port: number
+		cors: CorsConfig
 	}
 	database: {
 		uri: string

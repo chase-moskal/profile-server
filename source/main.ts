@@ -11,6 +11,8 @@ import {promises} from "fs"
 const {readFile} = promises
 
 import {apiServer} from "renraku/dist/api-server.js"
+import {unpackCorsConfig}
+	from "authoritarian/dist/toolbox/unpack-cors-config.js"
 
 import {ProfileMagistrate} from "./modules/profile-magistrate.js"
 import {createMongoCollection} from "./modules/create-mongo-collection.js"
@@ -40,10 +42,7 @@ export async function main() {
 					authServerPublicKey,
 					collection: profilesCollection
 				}),
-				cors: {
-					allowed: /^https?\:\/\/localhost\:8\d{3}$/i,
-					forbidden: null
-				}
+				cors: unpackCorsConfig(config.server.cors)
 			}
 		}
 	})
