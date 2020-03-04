@@ -51,8 +51,11 @@ export async function main() {
 	// run the koa server app
 	//
 
+	const host = "0.0.0.0"
+	const port = config.server.port
+
 	const koa = new Koa()
 	koa.use(mount("/api", apiKoa))
-	koa.listen(config.server.port)
+	koa.listen({host, port})
 	console.log(`Profile server listening on port ${config.server.port}`)
 }

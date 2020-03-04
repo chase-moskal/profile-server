@@ -34,7 +34,7 @@ export class ProfileMagistrate implements ProfileMagistrateTopic {
 		profile: Profile
 		accessToken: AccessToken
 	}): Promise<void> {
-		console.log("SET FULL PROFILE")
+		console.log("SET FULL PROFILE", givenProfile)
 
 		const {payload} = await tokenVerify<AccessPayload>({
 			token: accessToken,
