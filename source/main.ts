@@ -9,8 +9,8 @@ import {apiServer} from "renraku/dist/api-server.js"
 import {unpackCorsConfig}
 	from "authoritarian/dist/toolbox/unpack-cors-config.js"
 
-import {connectMongo} from "./modules/connect-mongo.js"
-import {ProfileMagistrate} from "./modules/profile-magistrate.js"
+import {connectMongo} from "./toolbox/connect-mongo.js"
+import {ProfileMagistrate} from "./api/profile-magistrate.js"
 
 import {Config, ProfileServerApi} from "./interfaces.js"
 
