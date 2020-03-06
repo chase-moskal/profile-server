@@ -1,11 +1,6 @@
 
-// TODO cjs
-import mod from "module"
-const require = mod.createRequire(import.meta.url)
-import * as _Koa from "koa"
-import * as _mount from "koa-mount"
-const Koa: typeof _Koa = require("koa") as typeof _Koa
-const mount: typeof _mount = require("koa-mount") as typeof _mount
+import Koa from "koa"
+import mount from "koa-mount"
 
 import {promises} from "fs"
 const {readFile} = promises
@@ -14,8 +9,8 @@ import {apiServer} from "renraku/dist/api-server.js"
 import {unpackCorsConfig}
 	from "authoritarian/dist/toolbox/unpack-cors-config.js"
 
+import {connectMongo} from "./modules/connect-mongo.js"
 import {ProfileMagistrate} from "./modules/profile-magistrate.js"
-import {createMongoCollection} from "./modules/create-mongo-collection.js"
 
 import {Config, ProfileServerApi} from "./interfaces.js"
 
@@ -26,7 +21,9 @@ main().catch(error => console.error(error))
 export async function main() {
 	const config: Config = JSON.parse(<string>await readFile(`${configPath}/config.json`, "utf8"))
 	const authServerPublicKey = <string>await readFile(`${configPath}/auth-server.public.pem`, "utf8")
-	const profilesCollection = await createMongoCollection(config.database)
+	const profilesCollection = await connectMongo(config.database)
+	const host = "0.0.0.0"
+	const port = config.server.port
 
 	//
 	// PROFILE SERVER API
@@ -50,9 +47,6 @@ export async function main() {
 	//
 	// run the koa server app
 	//
-
-	const host = "0.0.0.0"
-	const port = config.server.port
 
 	const koa = new Koa()
 	koa.use(mount("/api", apiKoa))

@@ -1,25 +1,21 @@
 
-// TODO cjs
-import mod from "module"
-const require = mod.createRequire(import.meta.url)
-import * as _mongodb from "mongodb"
-const mongodb = require("mongodb") as typeof _mongodb
+import {Collection} from "../commonjs/mongodb.js"
 
 import {
 	Profile,
 	AccessToken,
 	AccessPayload,
 	ProfileMagistrateTopic,
-} from "authoritarian/dist/interfaces"
+} from "authoritarian/dist/interfaces.js"
 
 import {tokenVerify} from "redcrypto/dist/token-verify.js"
 
 export class ProfileMagistrate implements ProfileMagistrateTopic {
-	private _collection: _mongodb.Collection
+	private _collection: Collection
 	private _authServerPublicKey: string
 
 	constructor({collection, authServerPublicKey}: {
-		collection: _mongodb.Collection
+		collection: Collection
 		authServerPublicKey: string
 	}) {
 		this._collection = collection
