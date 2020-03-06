@@ -21,7 +21,7 @@ main().catch(error => console.error(error))
 export async function main() {
 	const config: Config = JSON.parse(<string>await readFile(`${configPath}/config.json`, "utf8"))
 	const authServerPublicKey = <string>await readFile(`${configPath}/auth-server.public.pem`, "utf8")
-	const profilesCollection = await connectMongo(config.database)
+	const collection = await connectMongo(config.database)
 	const host = "0.0.0.0"
 	const port = config.server.port
 
@@ -36,8 +36,8 @@ export async function main() {
 		exposures: {
 			profileMagistrate: {
 				exposed: new ProfileMagistrate({
+					collection,
 					authServerPublicKey,
-					collection: profilesCollection
 				}),
 				cors: unpackCorsConfig(config.server.cors)
 			}
@@ -48,8 +48,9 @@ export async function main() {
 	// run the koa server app
 	//
 
-	const koa = new Koa()
-	koa.use(mount("/api", apiKoa))
-	koa.listen({host, port})
-	console.log(`Profile server listening on port ${config.server.port}`)
+	new Koa()
+		.use(mount("/api", apiKoa))
+		.listen({host, port})
+
+	console.log(`🌐 profile-server on ${port}`)
 }
