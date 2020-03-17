@@ -23,16 +23,18 @@
 		"source-a*/**": true,
 		"**/.git/objects/**": true,
 		"**/.git/subtree-cache/**": true,
-		"**/node_modules/*/**": true,
+		"**/node_modules/*/**": true
 	},
 
 	"typescript.tsdk": "node_modules/typescript/lib/",
 
 	"[yaml]": {
+		"editor.tabSize": 2,
 		"editor.insertSpaces": true
 	},
-
+	
 	"[markdown]": {
+		"editor.tabSize": 2,
 		"editor.insertSpaces": true
 	}
 }
