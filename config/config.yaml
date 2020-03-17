@@ -1,11 +1,13 @@
 
 profileServer:
   port: 8001
-  cors:
-    allowed:
-      pattern: ^https?://(.*)chasemoskal.com(|:8\d{3})$
-      flags: i
-    forbidden: null
-  mongo:
-    link: mongodb+srv://developer:eAQiCvYa2nQLKVPZ@devcluster-g4uwh.mongodb.net/test?retryWrites=true&w=majority
-    database: metaldev
+
+mongo:
+  link: mongodb+srv://developer:eAQiCvYa2nQLKVPZ@devcluster-g4uwh.mongodb.net/test?retryWrites=true&w=majority
+  database: metaldev
+
+cors:
+  allowed:
+    pattern: ^https?://(.*)metal(shop|back|dev|front)\.chasemoskal\.com(|:8\d{3})$
+    flags: i
+  forbidden: null

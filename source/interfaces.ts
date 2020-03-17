@@ -17,7 +17,9 @@ export interface CorsConfig {
 }
 
 export interface Config {
-	port: number
+	profileServer: {
+		port: number
+	}
 	cors: CorsConfig
 	mongo: {
 		link: string

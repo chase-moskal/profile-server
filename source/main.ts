@@ -16,7 +16,8 @@ import {Config, ProfileServerApi} from "./interfaces.js"
 import {ProfileMagistrate} from "./api/profile-magistrate.js"
 
 ~async function main() {
-	const config: Config = (await readYaml(paths.config)).profileServer
+	const config: Config = await readYaml(paths.config)
+	const {port} = config.profileServer
 	const authServerPublicKey = await read(paths.authServerPublicKey)
 	const profilesCollection = await connectMongo({
 		...config.mongo,
@@ -39,7 +40,7 @@ import {ProfileMagistrate} from "./api/profile-magistrate.js"
 
 	new Koa()
 		.use(mount("/api", apiKoa))
-		.listen({host: "0.0.0.0", port: config.port})
+		.listen({host: "0.0.0.0", port})
 
-	console.log(`🌐 profile-server on ${config.port}`)
+	console.log(`🌐 profile-server on ${port}`)
 }()
