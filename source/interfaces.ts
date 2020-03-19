@@ -11,22 +11,6 @@ export interface JsonRegex {
 	flags: string
 }
 
-export interface CorsConfig {
-	allowed: JsonRegex
-	forbidden?: JsonRegex
-}
-
-export interface Config {
-	profileServer: {
-		port: number
-	}
-	cors: CorsConfig
-	mongo: {
-		link: string
-		database: string
-	}
-}
-
 export interface MongoDatabaseConfig {
 	link: string
 	database: string

@@ -9,14 +9,15 @@ import mount from "koa-mount"
 import {apiServer} from "renraku/dist/api-server.js"
 import {unpackCorsConfig}
 	from "authoritarian/dist/toolbox/unpack-cors-config.js"
+import {ProfileServerConfig} from "authoritarian/dist/interfaces.js"
 
 import {read, readYaml} from "./toolbox/reading.js"
 import {connectMongo} from "./toolbox/connect-mongo.js"
-import {Config, ProfileServerApi} from "./interfaces.js"
+import {ProfileServerApi} from "./interfaces.js"
 import {ProfileMagistrate} from "./api/profile-magistrate.js"
 
 ~async function main() {
-	const config: Config = await readYaml(paths.config)
+	const config: ProfileServerConfig = await readYaml(paths.config)
 	const {port} = config.profileServer
 	const authServerPublicKey = await read(paths.authServerPublicKey)
 	const profilesCollection = await connectMongo({
