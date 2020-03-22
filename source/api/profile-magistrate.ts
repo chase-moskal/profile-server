@@ -38,19 +38,25 @@ export class ProfileMagistrate implements ProfileMagistrateTopic {
 		})
 		const {userId} = payload.user
 
+		if (userId !== givenProfile.userId)
+			throw new Error("profile userId doesn't match your own")
+
 		const errorWhenStringTooBig = (limit: number, value: string) => {
-			if (value.length > limit) throw new Error("string in profile too big!")
+			if (value.length > limit) throw new Error("string in profile too big")
 		}
 
-		const {avatar, nickname} = givenProfile
+		const {avatar, nickname, adminMode} = givenProfile
 
 		errorWhenStringTooBig(1000, avatar)
 		errorWhenStringTooBig(1000, nickname)
+		if (typeof adminMode !== "boolean")
+			throw new Error("adminMode must be a boolean")
 
 		const profile: Profile = {
 			userId,
 			avatar,
 			nickname,
+			adminMode,
 		}
 
 		await this._collection.replaceOne({userId}, profile, {upsert: true})
