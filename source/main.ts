@@ -1,39 +1,38 @@
 
+import Koa from "koa"
+import mount from "koa-mount"
+import {apiServer} from "renraku/dist/api-server.js"
+
+import {read, readYaml} from "authoritarian/dist/toolbox/reading.js"
+import {connectMongo} from "authoritarian/dist/toolbox/connect-mongo.js"
+import {ProfileApi, ProfileServerConfig} from "authoritarian/dist/interfaces.js"
+import {unpackCorsConfig} from "authoritarian/dist/toolbox/unpack-cors-config.js"
+import {makeVerifyToken} from "authoritarian/dist/toolbox/tokens/make-verify-token.js"
+import {makeProfileMagistrate} from "authoritarian/dist/business/profile-magistrate/magistrate.js"
+import {mongoProfileDatalayer} from "authoritarian/dist/business/profile-magistrate/mongo-profile-datalayer.js"
+
 const paths = {
 	config: "config/config.yaml",
 	authServerPublicKey: "config/auth-server.public.pem",
 }
 
-import Koa from "koa"
-import mount from "koa-mount"
-import {apiServer} from "renraku/dist/api-server.js"
-import {unpackCorsConfig}
-	from "authoritarian/dist/toolbox/unpack-cors-config.js"
-import {ProfileServerConfig} from "authoritarian/dist/interfaces.js"
-
-import {read, readYaml} from "./toolbox/reading.js"
-import {connectMongo} from "./toolbox/connect-mongo.js"
-import {ProfileServerApi} from "./interfaces.js"
-import {ProfileMagistrate} from "./api/profile-magistrate.js"
-
 ~async function main() {
 	const config: ProfileServerConfig = await readYaml(paths.config)
 	const {port} = config.profileServer
 	const authServerPublicKey = await read(paths.authServerPublicKey)
-	const profilesCollection = await connectMongo({
-		...config.mongo,
-		collection: "profiles",
+	const collection = await connectMongo(config.mongo, "profiles")
+
+	const profileMagistrate = makeProfileMagistrate({
+		verifyToken: makeVerifyToken(authServerPublicKey),
+		profileDatalayer: mongoProfileDatalayer({collection}),
 	})
 
-	const {koa: apiKoa} = await apiServer<ProfileServerApi>({
+	const {koa: apiKoa} = await apiServer<ProfileApi>({
 		debug: true,
 		logger: console,
 		exposures: {
 			profileMagistrate: {
-				exposed: new ProfileMagistrate({
-					authServerPublicKey,
-					collection: profilesCollection,
-				}),
+				exposed: profileMagistrate,
 				cors: unpackCorsConfig(config.cors)
 			}
 		}
