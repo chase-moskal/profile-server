@@ -5,12 +5,18 @@ import {apiServer} from "renraku/dist/api-server.js"
 
 import {curryVerifyToken} from "redcrypto/dist/curries/curry-verify-token.js"
 
+import {Logger} from "authoritarian/dist/toolbox/logger.js"
+import {health} from "authoritarian/dist/toolbox/health.js"
 import {read, readYaml} from "authoritarian/dist/toolbox/reading.js"
 import {connectMongo} from "authoritarian/dist/toolbox/connect-mongo.js"
+import {dieWithDignity} from "authoritarian/dist/toolbox/die-with-dignity.js"
 import {ProfileApi, ProfileServerConfig} from "authoritarian/dist/interfaces.js"
 import {unpackCorsConfig} from "authoritarian/dist/toolbox/unpack-cors-config.js"
 import {makeProfileMagistrate} from "authoritarian/dist/business/profile-magistrate/magistrate.js"
 import {mongoProfileDatalayer} from "authoritarian/dist/business/profile-magistrate/mongo-profile-datalayer.js"
+
+const logger = new Logger()
+dieWithDignity({logger})
 
 const paths = {
 	config: "config/config.yaml",
@@ -29,8 +35,8 @@ const paths = {
 	})
 
 	const {koa: apiKoa} = await apiServer<ProfileApi>({
+		logger,
 		debug: true,
-		logger: console,
 		exposures: {
 			profileMagistrate: {
 				exposed: profileMagistrate,
@@ -40,8 +46,10 @@ const paths = {
 	})
 
 	new Koa()
+		.use(health({logger}))
 		.use(mount("/api", apiKoa))
 		.listen({host: "0.0.0.0", port})
 
-	console.log(`🌐 profile-server on ${port}`)
-}()
+	logger.info(`🌐 profile-server on ${port}`)
+
+}().catch(error => logger.error(error))
