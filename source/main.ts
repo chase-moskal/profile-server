@@ -9,14 +9,14 @@ import {Logger} from "authoritarian/dist/toolbox/logger.js"
 import {health} from "authoritarian/dist/toolbox/health.js"
 import {read, readYaml} from "authoritarian/dist/toolbox/reading.js"
 import {connectMongo} from "authoritarian/dist/toolbox/connect-mongo.js"
-import {dieWithDignity} from "authoritarian/dist/toolbox/die-with-dignity.js"
+import {deathWithDignity} from "authoritarian/dist/toolbox/death-with-dignity.js"
 import {ProfileApi, ProfileServerConfig} from "authoritarian/dist/interfaces.js"
 import {unpackCorsConfig} from "authoritarian/dist/toolbox/unpack-cors-config.js"
 import {makeProfileMagistrate} from "authoritarian/dist/business/profile-magistrate/magistrate.js"
 import {mongoProfileDatalayer} from "authoritarian/dist/business/profile-magistrate/mongo-profile-datalayer.js"
 
 const logger = new Logger()
-dieWithDignity({logger})
+deathWithDignity({logger})
 
 const paths = {
 	config: "config/config.yaml",
@@ -27,7 +27,8 @@ const paths = {
 	const config: ProfileServerConfig = await readYaml(paths.config)
 	const {port} = config.profileServer
 	const authServerPublicKey = await read(paths.authServerPublicKey)
-	const collection = await connectMongo(config.mongo, "profiles")
+	const database = await connectMongo(config.mongo)
+	const collection = database.collection("profiles")
 
 	const profileMagistrate = makeProfileMagistrate({
 		verifyToken: curryVerifyToken(authServerPublicKey),
