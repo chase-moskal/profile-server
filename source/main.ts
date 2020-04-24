@@ -9,8 +9,8 @@ import {Logger} from "authoritarian/dist/toolbox/logger.js"
 import {health} from "authoritarian/dist/toolbox/health.js"
 import {read, readYaml} from "authoritarian/dist/toolbox/reading.js"
 import {connectMongo} from "authoritarian/dist/toolbox/connect-mongo.js"
-import {deathWithDignity} from "authoritarian/dist/toolbox/death-with-dignity.js"
 import {ProfileApi, ProfileServerConfig} from "authoritarian/dist/interfaces.js"
+import {deathWithDignity} from "authoritarian/dist/toolbox/death-with-dignity.js"
 import {unpackCorsConfig} from "authoritarian/dist/toolbox/unpack-cors-config.js"
 import {makeProfileMagistrate} from "authoritarian/dist/business/profile-magistrate/magistrate.js"
 import {mongoProfileDatalayer} from "authoritarian/dist/business/profile-magistrate/mongo-profile-datalayer.js"
@@ -25,6 +25,7 @@ const paths = {
 
 ~async function main() {
 	const config: ProfileServerConfig = await readYaml(paths.config)
+	const {debug} = config
 	const {port} = config.profileServer
 	const authServerPublicKey = await read(paths.authServerPublicKey)
 	const database = await connectMongo(config.mongo)
@@ -36,8 +37,8 @@ const paths = {
 	})
 
 	const {koa: apiKoa} = await apiServer<ProfileApi>({
+		debug,
 		logger,
-		debug: true,
 		exposures: {
 			profileMagistrate: {
 				exposed: profileMagistrate,

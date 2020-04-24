@@ -1,4 +1,6 @@
 
+debug: true
+
 profileServer:
   port: 8001
 

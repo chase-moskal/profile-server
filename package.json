@@ -26,13 +26,13 @@
 	},
 	"homepage": "https://github.com/chase-moskal/profile-server#readme",
 	"dependencies": {
-		"authoritarian": "0.0.0-dev.51",
+		"authoritarian": "0.0.0-dev.52",
 		"js-yaml": "^3.13.1",
 		"koa": "^2.11.0",
 		"koa-mount": "^4.0.0",
 		"mongodb": "^3.5.6",
 		"redcrypto": "0.0.0-dev.5",
-		"renraku": "0.0.0-dev.25"
+		"renraku": "0.0.0-dev.28"
 	},
 	"devDependencies": {
 		"@types/js-yaml": "^3.12.3",
